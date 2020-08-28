@@ -1,32 +1,58 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <errno.h>
+#include <ctype.h>
 
-int main (int argc, char * argv[]) {
-    int f;
-    char * OPTSTRING = "h";
+int main (int argc, char *argv[]) {
+  int f;
+  const char *OPTSTRING = "hde";
+  const char *alphabet[] = {"abcdefghijklmnopqrstuvwxyz",
+                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"}; 
+  int decrypt = 0;
 
-// 65 - 122 alphabetical
   while ((f = getopt(argc, argv, OPTSTRING)) != -1) {
-      if(f == 'h') {
-         printf("Enter the appropriate flag\n");
-      } 
+    switch (f) {
+      case 'h':
+       printf("Enter the appropriate flag\n");
+       break;
+     case 'd':
+       decrypt = 1;
+       printf("Decrypting..\n");
+       break;
+     case 'e':
+       printf("Encrypting..\n");
+    }
   }
 
-  if (argc < 2 || argc > 3) {
-      printf("Wrong num of args\n");
-      return 1;
+  char *endptr;
+  int key;
+
+  // after parsing flags, should be two arguments, key and pw
+  if ((argc - optind == 2) && decrypt) {
+    key = strtoul(argv[optind], &endptr, 10);
+    optind++;
+    printf("Key is: %i\n", key);
+  } else {
+    fprintf(stderr, "Wrong num args\n");
+    return EXIT_FAILURE;
   }
-  char * userInput = argv[optind];
+
+  char *userInput = argv[optind];
+  int shift = key % 26;
   int len = strlen(userInput);
   int i;
 
-  // rotate every character left by 10
   for (i = 0; i < len; i++) {
       char c = userInput[i];
-      c -= 10;
-      if (c < 65) c = 'z' - ('A' - c);
-      userInput[i] = c;
+      if (isupper(c)) {
+        c = c - 'A';
+        userInput[i] = alphabet[1][(((c - shift) + 26) % 26)];
+      } else {
+        c = c - 'a';
+        userInput[i] = alphabet[0][(((c - shift) + 26) % 26)];
+      }
   }
   printf("%s\n", userInput);
   return 0;
