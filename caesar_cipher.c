@@ -29,7 +29,7 @@ int main (int argc, char *argv[]) {
   char *endptr;
   int key;
 
-  // after parsing flags, should be two arguments, key and pw
+  // after parsing flags, should be two arguments, key and string 
   if ((argc - optind == 2) && decrypt) {
     key = strtoul(argv[optind], &endptr, 10);
     optind++;
@@ -39,21 +39,19 @@ int main (int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  char *userInput = argv[optind];
+  char *m = argv[optind];
   int shift = key % 26;
-  int len = strlen(userInput);
-  int i;
+  int l = strlen(m);
 
-  for (i = 0; i < len; i++) {
-      char c = userInput[i];
-      if (isupper(c)) {
-        c = c - 'A';
-        userInput[i] = alphabet[1][(((c - shift) + 26) % 26)];
-      } else {
-        c = c - 'a';
-        userInput[i] = alphabet[0][(((c - shift) + 26) % 26)];
-      }
+  int i;
+  for (i = 0; i < l; i++) {
+    if (!isalpha(m[i])) continue; 
+    if (isupper(m[i])) {
+      m[i] = alphabet[1][(((tolower(m[i]) - 'a') + shift) % 26)];
+    } else {
+      m[i] = alphabet[0][(((tolower(m[i]) - 'a') + shift) % 26)];
+    }
   }
-  printf("%s\n", userInput);
+  printf("%s\n", m);
   return 0;
 }
